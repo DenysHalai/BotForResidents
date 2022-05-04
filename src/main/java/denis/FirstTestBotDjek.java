@@ -6,9 +6,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -19,7 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -68,20 +67,30 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
                         .substring(commandEntity.get().getOffset(), commandEntity.get().getLength());
                 switch (command) {
                     case "/start":
-                        execute(
-                                SendMessage.builder()
-                                        .text("Будь-ласка оберіть, в чому саме у вас виникла проблема:")
-                                        .chatId(message.getChatId().toString())
-                                        .replyMarkup(
-                                                new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
-                                                        buttonsNew("Phone", true, false),
-                                                        buttonsNew("Geo", false, true)
-                                                ))))
-                                        )
-                                        .build());
+                        if (userRepository.(message.getChatId()).isPresent()) {
+                            execute(
+                                    SendMessage.builder()
+                                            .text("Будь-ласка поділіться вашим номером телефону натиснувши на кнопку:")
+                                            .chatId(message.getChatId().toString())
+                                            .replyMarkup(startButton())
+                                            .build());
+                        } else {
+                            execute(
+                                    SendMessage.builder()
+                                            .text("Оберіть будь-ласка що вас цікавить")
+                                            .chatId(message.getChatId().toString())
+                                            .build());
+                        }
                 }
             }
         }
+    }
+
+    public chatIdNew(Long chatId){
+        User entity = new User();
+        entity.setChatId(chatId);
+        userRepository.
+        return;
     }
 
     @Override
@@ -93,6 +102,14 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static ReplyKeyboardMarkup startButton() {
+        ReplyKeyboardMarkup startButton = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
+                buttonsNew("Натисніть щоб поділитися телефоном", true, false)
+        ))));
+        startButton.setResizeKeyboard(true);
+        return startButton;
     }
 
     public static KeyboardButton buttonsNew(String titleButtons, boolean requestContact, boolean requestGeo) {
