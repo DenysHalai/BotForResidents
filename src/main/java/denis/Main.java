@@ -16,3 +16,5 @@ public class Main {
         SpringApplication.run(Main.class, args);
     }
 }
+
+//https://habr.com/ru/post/418905/ InlineKeyboard в Телеграмм ботах (Telegram Bots)
