@@ -42,9 +42,7 @@ CREATE TABLE users
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="61a1081d-367b-419f-8b57-40aec7601536" object-ref="schemas/public/tables/users" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="61a1081d-367b-419f-8b57-40aec7601536" />
