@@ -4,6 +4,7 @@ import denis.model.Icon;
 import denis.model.User;
 import denis.repository.UserRepository;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,24 +41,33 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     private String botToken;
 
     @Override
-    public String getBotToken() {
-        return botToken;
-    }
-
-    @Override
-    public String getBotUsername() {
-        return botUsername;
+    public void onUpdateReceived(Update update) {
+        Message message = update.getMessage();
+        if (message != null && message.hasText() || message != null && message.hasContact() || message != null && message.hasLocation()) {
+            log.info("New message from User:{}, chatId: {}, with text: {}",
+                    message.getFrom().getUserName(), message.getChatId(), message.getText());
+            if (update.hasMessage()) {
+                try {
+                    handleMessage(update.getMessage());
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void handleMessage(Message message) throws TelegramApiException {
         Optional<User> byChatId = userRepository.findByChatId(message.getChatId());
         User user;
-        if (byChatId.isPresent()){
+        if (byChatId.isPresent()) {
             user = byChatId.get();
         } else {
             user = new User();
             user.setChatId(message.getChatId());
             userRepository.save(user);
+        }
+        switch (message.getText()){
+            case "/start":
         }
         if (message.hasContact()) {
             Contact contact = message.getContact();
@@ -73,17 +83,9 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
                                     "\uD83D\uDD39 Якщо ви зараз знаходитесь за адресою, яку хочете додати, просто відправте мені вашу поточну геолокацію, натиснувши на відповідну кнопку\n" +
                                     "\uD83D\uDD39 Якщо ви зараз НЕ знаходитесь за адресою, натисніть на кнопку \"Ввести адресу вручну\" і вкажіть адресу вашого житла за допомогою клавіатури")
                             .chatId(message.getChatId().toString())
-                            .replyMarkup(inlineKeyboardOne())
-                            .build()
-            );
-            execute(
-                    SendMessage
-                            .builder()
-                            .chatId(message.getChatId().toString())
                             .replyMarkup(geoButton())
                             .build()
             );
-
         }
 
         if (message.hasLocation()) {
@@ -106,7 +108,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
                         .substring(commandEntity.get().getOffset(), commandEntity.get().getLength());
                 switch (command) {
                     case "/start":
-                        if (user.getPhoneNumber() != null) {
+                        if (user.getPhoneNumber() == null) {
                             execute(
                                     SendMessage.builder()
                                             .text("Привіт! \uD83D\uDC4B\n" +
@@ -117,29 +119,21 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
                                                     "\n" +
                                                     "Зауважте, що поділитися номером можна лише з мобільної або десктопної версії Телеграма — з веб-версії (в браузері) це зробити неможливо ❗️")
                                             .chatId(message.getChatId().toString())
-                                            .replyMarkup(mainMenuButtons())
+                                            .replyMarkup(startButton())
                                             .build());
                         } else {
                             execute(
                                     SendMessage.builder()
                                             .text("Вибачте, але я вас не зрозумів. Щоб продовжити, натисніть одну з КНОПОК нижче \uD83D\uDC47")
                                             .chatId(message.getChatId().toString())
+                                            .replyMarkup(mainMenuButtons())
                                             .build());
                         }
                 }
             }
         }
     }
-    @Override
-    public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) {
-            try {
-                handleMessage(update.getMessage());
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     public static ReplyKeyboardMarkup startButton() {
         ReplyKeyboardMarkup startButton = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
@@ -177,12 +171,12 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
         return inlineKeyboardOne;
     }
 
-    public static ReplyKeyboardMarkup mainMenuButtons(){
+    public static ReplyKeyboardMarkup mainMenuButtons() {
         ReplyKeyboardMarkup mainMenuButtons = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
-                buttonsNew("Мої зверення", false,false),
-                buttonsNew("Мої адреси", false,false),
-                buttonsNew("Доступні послуги", false,false),
-                buttonsNew("Інструкції по боту", false,false)
+                buttonsNew("Мої зверення", false, false),
+                buttonsNew("Мої адреси", false, false),
+                buttonsNew("Доступні послуги", false, false),
+                buttonsNew("Інструкції по боту", false, false)
         ))));
         mainMenuButtons.setResizeKeyboard(true);
         return mainMenuButtons;
