@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.xml.stream.Location;
 
 @Entity
 @Table(name = "users")
@@ -26,6 +25,10 @@ public class User {
     @NotNull
     private Long chatId;
 
+    @Column(name = "user_id", unique = true)
+    @NotNull
+    private Long userId;
+
     @Column(name = "name")
     @NotBlank
     private String name;
@@ -41,5 +44,13 @@ public class User {
     @Column(name = "latitudeGeo")
     @NotNull
     private Double latitude;
+
+    @Column(name = "bot_state")
+    @NotBlank
+    @Enumerated(EnumType.STRING)
+    private BotState bot_state;
+
+    @Column(name = "local_state")
+    private String local_state;
 
 }

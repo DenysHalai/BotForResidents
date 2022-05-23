@@ -104,7 +104,7 @@ CREATE TABLE users
           <database value="d34o8m09u92hfn" />
           <type value="USER_PASSWORD" />
           <user value="eeibngczdsjilq" />
-          <deprecated-pwd value="ODI2MzBkZDE1MDZkZWYyYzkzOGY3YWVlNDM3ODFiZTg2MmMzMzQ1MDhmZDA0MjIwNmFmMTgzMTAxYzAwMTBkNA==" />
+          <deprecated-pwd value="" />
         </database>
         <properties>
           <auto-commit value="false" />
