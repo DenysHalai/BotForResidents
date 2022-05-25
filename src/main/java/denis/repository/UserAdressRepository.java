@@ -1,15 +1,15 @@
 package denis.repository;
 
 import denis.model.Case;
+import denis.model.UserAdress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface CaseRepository extends JpaRepository<Case, Long> {
-    List<Case> findByUserId(Long userId);
+public interface UserAdressRepository extends JpaRepository<UserAdress, String> {
+    List<UserAdress> findByUserId(Long userId);
 }

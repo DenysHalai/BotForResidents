@@ -1,21 +1,24 @@
 package denis;
 
 import denis.cache.UserDataCache;
-import denis.model.BotState;
-import denis.model.Handler;
-import denis.model.TextMessage;
+import denis.googleMapsApi.GeodecodingSample;
+import denis.model.*;
 import denis.model.User;
+import denis.repository.UserAdressRepository;
 import denis.repository.UserRepository;
 import denis.service.ReplyButtonsService;
 import denis.service.ReplyMessageService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,8 +49,8 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             Message message = update.getMessage();
             if (update.hasMessage()) {
                 handleMessage(update.getMessage());
-                log.info("New message from User:{}, userId: {}, chatId: {}, with text: {}",
-                        message.getFrom().getUserName(), message.getFrom().getId(), message.getChatId(), message.getText());
+                /*log.info("New message from User:{}, userId: {}, chatId: {}, with text: {}",
+                        message.getFrom().getUserName(), message.getFrom().getId(), message.getChatId(), message.getText());*/
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,10 +58,9 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
 
     }
 
-    private void handleMessage(Message message) {
+    private void handleMessage(Message message) throws IOException {
         Optional<User> byChatId = userRepository.findByChatId(message.getChatId());
         User user;
-        String inputMessage = message.getText();
 
         // проверка наличия юзера в БД
         if (byChatId.isPresent()) {
@@ -77,9 +79,9 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             userRepository.save(user);
         }
 
-        if (message.hasText() || message.hasEntities()) {
+        if (message.hasText() || message.hasEntities() || message.hasLocation()) {
             for (Handler handler : handlerList) {
-                if (inputMessage.equals(handler.commandName()) || handler.state().equals(user.getBot_state())) {
+                if (handler.state().equals(user.getBot_state()) || message.getText().equals(handler.commandName())) {
                     handler.execute(new ExecutionContext(user, replyMessageService, userRepository, message));
                     break;
                 }
@@ -89,14 +91,30 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             user.setName(contact.getFirstName());
             user.setPhoneNumber(contact.getPhoneNumber());
             userRepository.save(user);
-            replyMessageService.replyMessage(TextMessage.sendLocation, ReplyButtonsService.geoButton());
-        } else if (message.hasLocation()) {
+            replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newButtons("Додати адресу"));
+        }/* else if (message.hasLocation()) {*//*
             user.setLatitude(message.getLocation().getLatitude());
             user.setLongitude(message.getLocation().getLongitude());
             userRepository.save(user);
-            replyMessageService.replyMessage(TextMessage.successLocation);
-        } else {
-            replyMessageService.replyMessage(TextMessage.erorMessage, ReplyButtonsService.mainMenuButtons());
+            JSONObject location = param.geodecodingSample(message.getLocation().getLatitude().toString(),
+                    message.getLocation().getLongitude().toString());
+            String fullAdress = location.getString("formatted_address");
+            replyMessageService.replyMessage(("Ваш адрес: " + fullAdress), ReplyButtonsService.newButtons("Так, це моя адреса", "Ні, адреса не вірна"));
+            if (message.getText().equals("Так, це моя адреса")) {
+                UserAdress userAdress = new UserAdress();
+                userAdress.setUserId(message.getContact().getUserId());
+                userAdress.setCountry(location.getString("country"));
+                userAdress.setRegion(location.getString("administrative_area_level_1"));
+                userAdress.setRegionLevel2(location.getString("administrative_area_level_2"));
+                userAdress.setCity(location.getString("locality"));
+                userAdress.setStreet(location.getString("route"));
+                userAdress.setBuildingNumbers(location.getString("street_number"));
+                userAdress.setPostalCode(location.getString("postal_code"));
+                replyMessageService.replyMessage(TextMessage.successLocation);
+                user.setBot_state(BotState.MAIN_MENU);
+            }
+        }*/ else {
+            replyMessageService.replyMessage(TextMessage.erorMessage, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
         }
     }
 }

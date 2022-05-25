@@ -12,9 +12,10 @@ import denis.repository.CaseRepository;
 import denis.service.ReplyMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import java.util.Collections;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -49,7 +50,7 @@ public class MyCase implements Handler {
                 break;
             }
             case "createCaseDesc": {
-                replyMessageService.replyMessage(TextMessage.clickCaseCreateSuccess, ReplyButtonsService.mainMenuButtons());
+                replyMessageService.replyMessage(TextMessage.clickCaseCreateSuccess, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
                 executionContext.setGlobalState(BotState.MAIN_MENU);
                 localState.setDescription(executionContext.getMessage().getText());
                 Case newCase = new Case();
@@ -61,10 +62,11 @@ public class MyCase implements Handler {
                 break;
             }
             case "Список всіх зверненнь":
-                replyMessageService.replyMessage(TextMessage.clickCaseMainMenu);
+                replyMessageService.replyMessage(oneCases(executionContext.getUser().getUserId()), ReplyButtonsService.newButtons("Створити звернення", "До головного меню"));
+                executionContext.setGlobalState(BotState.CASE_ALL);
                 break;
             default:
-                replyMessageService.replyMessage(TextMessage.clickCaseMainMenu, createCase());
+                replyMessageService.replyMessage(TextMessage.clickCaseMainMenu, ReplyButtonsService.newButtons("Створити звернення", "Список всіх зверненнь"));
                 executionContext.setGlobalState(BotState.CASE_ALL);
                 localState.setNextStep("allCases");
         }
@@ -81,12 +83,19 @@ public class MyCase implements Handler {
         return BotState.CASE_ALL;
     }
 
+    public String oneCases(Long userId) {
+        Iterable<Case> caseList = caseRepository.findByUserId(userId);
+        List<String> casesListString = new ArrayList<>();
+        int count = 1;
+        for (Case elem : caseList) {
+            casesListString.add(count + "." + " " + elem.getTitle() + " - " + elem.getDescription() + "\n");
+            count++;
+        }
 
-    public static ReplyKeyboardMarkup createCase() {
-        ReplyKeyboardMarkup geoButton = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
-                InlineButtons.buttonsNew("Створити звернення", false, false)
-        ))));
-        geoButton.setResizeKeyboard(true);
-        return geoButton;
+        StringBuilder sb = new StringBuilder();
+        for (String elem : casesListString) {
+            sb.append(elem);
+        }
+        return sb.toString();
     }
 }

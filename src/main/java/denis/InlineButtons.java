@@ -21,15 +21,4 @@ public class InlineButtons {
         inlineKeyboardOne.setKeyboard(rowList);
         return inlineKeyboardOne;
     }
-
-    public static KeyboardButton buttonsNew(String titleButtons, boolean requestContact, boolean requestGeo) {
-        KeyboardButton buttonFirst = new KeyboardButton(titleButtons);
-        buttonFirst.setRequestContact(requestContact);
-        buttonFirst.setRequestLocation(requestGeo);
-        return buttonFirst;
-    }
-
-    public static KeyboardButton buttonsNew(String titleButtons) {
-        return buttonsNew(titleButtons, false, false);
-    }
 }

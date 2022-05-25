@@ -28,11 +28,32 @@ public class ReplyMessageService {
         }
     }
 
+    public void replyMessage(String textMessage, ReplyKeyboard replyKeyboard) {
+        try {
+            bot.execute(
+                    SendMessage.builder()
+                            .text(textMessage)
+                            .chatId(String.valueOf(chatId))
+                            .replyMarkup(replyKeyboard)
+                            .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void replyMessage(TextMessage textMessage, boolean hideButtons) {
         replyMessage(textMessage, new ReplyKeyboardRemove(hideButtons));
     }
 
+    public void replyMessage(String textMessage, boolean hideButtons) {
+        replyMessage(textMessage, new ReplyKeyboardRemove(hideButtons));
+    }
+
     public void replyMessage(TextMessage textMessage) {
+        replyMessage(textMessage,true);
+    }
+
+    public void replyMessage(String textMessage) {
         replyMessage(textMessage,true);
     }
 }

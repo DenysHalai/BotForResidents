@@ -14,7 +14,7 @@ public class StartHandler implements Handler {
         if (executionContext.getUser().getPhoneNumber() == null) {
             executionContext.getReplyMessageService().replyMessage(TextMessage.helloMessage, ReplyButtonsService.startButton());
         } else {
-            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.mainMenuButtons());
+            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
         }
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }
