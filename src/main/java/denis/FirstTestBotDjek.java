@@ -9,13 +9,17 @@ import denis.repository.UserRepository;
 import denis.service.ReplyButtonsService;
 import denis.service.ReplyMessageService;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
+import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResult;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.io.IOException;
@@ -37,6 +41,9 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     @Autowired
     List<Handler> handlerList = new ArrayList<>();
 
+    @Autowired
+    private InlineLocationMode inlineLocationMode;
+
     private UserDataCache userDataCache;
 
     @Value("${bot.token}")
@@ -49,13 +56,21 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             Message message = update.getMessage();
             if (update.hasMessage()) {
                 handleMessage(update.getMessage());
-                /*log.info("New message from User:{}, userId: {}, chatId: {}, with text: {}",
-                        message.getFrom().getUserName(), message.getFrom().getId(), message.getChatId(), message.getText());*/
+            } else if (update.hasInlineQuery()) {
+                handleInlineQuery(update.getInlineQuery());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    private void handleInlineQuery(InlineQuery inlineQuery) {
+        List<InlineQueryResult> inlineQueryResults = inlineLocationMode.execute(inlineQuery);
+        try {
+            execute(AnswerInlineQuery.builder().inlineQueryId(inlineQuery.getId()).results(inlineQueryResults).build());
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleMessage(Message message) throws IOException {
@@ -92,28 +107,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             user.setPhoneNumber(contact.getPhoneNumber());
             userRepository.save(user);
             replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newButtons("Додати адресу"));
-        }/* else if (message.hasLocation()) {*//*
-            user.setLatitude(message.getLocation().getLatitude());
-            user.setLongitude(message.getLocation().getLongitude());
-            userRepository.save(user);
-            JSONObject location = param.geodecodingSample(message.getLocation().getLatitude().toString(),
-                    message.getLocation().getLongitude().toString());
-            String fullAdress = location.getString("formatted_address");
-            replyMessageService.replyMessage(("Ваш адрес: " + fullAdress), ReplyButtonsService.newButtons("Так, це моя адреса", "Ні, адреса не вірна"));
-            if (message.getText().equals("Так, це моя адреса")) {
-                UserAdress userAdress = new UserAdress();
-                userAdress.setUserId(message.getContact().getUserId());
-                userAdress.setCountry(location.getString("country"));
-                userAdress.setRegion(location.getString("administrative_area_level_1"));
-                userAdress.setRegionLevel2(location.getString("administrative_area_level_2"));
-                userAdress.setCity(location.getString("locality"));
-                userAdress.setStreet(location.getString("route"));
-                userAdress.setBuildingNumbers(location.getString("street_number"));
-                userAdress.setPostalCode(location.getString("postal_code"));
-                replyMessageService.replyMessage(TextMessage.successLocation);
-                user.setBot_state(BotState.MAIN_MENU);
-            }
-        }*/ else {
+        } else {
             replyMessageService.replyMessage(TextMessage.erorMessage, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
         }
     }

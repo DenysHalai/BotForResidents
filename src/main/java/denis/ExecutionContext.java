@@ -20,6 +20,9 @@ public class ExecutionContext {
     public void setGlobalState(BotState state) {
         user.setBot_state(state);
         userRepository.save(user);
+        if (state == BotState.MAIN_MENU){
+            setLocalState(null);
+        }
     }
 
     public void setLocalState(String state) {
@@ -45,7 +48,11 @@ public class ExecutionContext {
 
     public void setLocalState(Object o) {
         try {
-            setLocalState(mapper.writeValueAsString(o));
+            String x = null;
+            if (o != null) {
+                x = mapper.writeValueAsString(o);
+            }
+            setLocalState(x);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

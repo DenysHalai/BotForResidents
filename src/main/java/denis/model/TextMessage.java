@@ -25,8 +25,8 @@ public enum TextMessage {
 
     private String value;
 
-    public String getValue(TextMessage textMessage) {
-        return String.valueOf(textMessage.value);
+    public String getValue() {
+        return value;
     }
 
     TextMessage(String value) {
