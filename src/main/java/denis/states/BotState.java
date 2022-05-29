@@ -1,4 +1,4 @@
-package denis.model;
+package denis.states;
 
 public enum BotState {
     NEW_USER,

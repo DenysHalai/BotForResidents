@@ -1,10 +1,13 @@
 package denis.handlers;
 
-import denis.AddressLocalState;
-import denis.ExecutionContext;
-import denis.InlineButtons;
+import denis.model.Handler;
+import denis.model.TextMessage;
+import denis.model.UserAdress;
+import denis.states.AddressLocalState;
+import denis.states.BotState;
+import denis.states.ExecutionContext;
+import denis.service.InlineButtonsService;
 import denis.googleMapsApi.GeodecodingSample;
-import denis.model.*;
 import denis.repository.UserAdressRepository;
 import denis.service.ReplyButtonsService;
 import denis.service.ReplyMessageService;
@@ -12,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -44,11 +46,8 @@ public class AddLocation implements Handler {
             Map<String, Object> location = param.geodecodingSample(executionContext.getMessage().getLocation().getLatitude().toString(),
                     executionContext.getMessage().getLocation().getLongitude().toString());
             localState.setLocation(location);
-            List<Map<String, Object>> mapList = (List<Map<String, Object>>) location.get("results");
-            Map<String, Object> stringObjectMap = mapList.get(0);
-            String fullAddress = (String) stringObjectMap.get("formatted_address");
-            findAddressUser(mapList, "country");
-            replyMessageService.replyMessage(("Ваш адрес: " + fullAddress), ReplyButtonsService.newButtons("Так, це моя адреса", "Ні, адреса не вірна"));
+
+            replyMessageService.replyMessage(("Ваш адрес: " + location.get("settlement_type") + " " + location.get("settlement") + ", " + location.get("street_type") + " " + location.get("street") + ", " + location.get("name")), ReplyButtonsService.newButtons("Так, це моя адреса", "Ні, адреса не вірна"));
         } else {
             switch (nextStep) {
                 case "Так, це моя адреса": {
@@ -76,6 +75,7 @@ public class AddLocation implements Handler {
                 case "Ввод номеру квартири": {
                     UserAdress userAdress = new UserAdress();
                     Map<String, Object> location = localState.getLocation();
+                    /*
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) location.get("results");
                     userAdress.setUserId(executionContext.getMessage().getChatId());
                     userAdress.setFlatNumbers(executionContext.getMessage().getText());
@@ -86,19 +86,20 @@ public class AddLocation implements Handler {
                     userAdress.setStreet(findAddressUser(mapList, "route"));
                     userAdress.setBuildingNumbers(findAddressUser(mapList, "street_number"));
                     userAdress.setPostalCode(findAddressUser(mapList, "postal_code"));
-                    userAdressRepository.save(userAdress);
+                    userAdressRepository.save(userAdress);*/
                     executionContext.setGlobalState(BotState.MAIN_MENU);
                     replyMessageService.replyMessage(TextMessage.successLocation, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
                     break;
                 }
                 case "Вказати адресу вручну": {
                     replyMessageService.hideButtons();
-                    replyMessageService.replyMessage("Натисніть на кнопку нижче, щоб почати вводити адресу:", InlineButtons.inlineKeyboardQueryCurrentChat("Ввести адресу"));
+                    replyMessageService.replyMessage("Натисніть на кнопку нижче, щоб почати вводити адресу:", InlineButtonsService.inlineKeyboardQueryCurrentChat("Ввести адресу"));
                     localState.setNextStep("Вказав адресу вручну");
                     break;
                 }
                 case "Вказав адресу вручну": {
-
+                    replyMessageService.replyMessage("Це багатоквартирний будинок?", ReplyButtonsService.newButtons("Так", "Ні"));
+                    localState.setNextStep("Багатоквартирний будинок");
                 }
                 default:
                     replyMessageService.replyMessage("Натисніть кнопку, щоб поділитися своєю адресою:", ReplyButtonsService.geoButton());
@@ -110,7 +111,7 @@ public class AddLocation implements Handler {
 
     private void extracted(ExecutionContext executionContext, AddressLocalState localState, ReplyMessageService replyMessageService) {
         UserAdress userAdress = new UserAdress();
-        Map<String, Object> location = localState.getLocation();
+        Map<String, Object> location = localState.getLocation();/*
         List<Map<String, Object>> mapList = (List<Map<String, Object>>) location.get("results");
         userAdress.setUserId(executionContext.getMessage().getChatId());
         userAdress.setCountry(findAddressUser(mapList, "country"));
@@ -120,7 +121,7 @@ public class AddLocation implements Handler {
         userAdress.setStreet(findAddressUser(mapList, "route"));
         userAdress.setBuildingNumbers(findAddressUser(mapList, "street_number"));
         userAdress.setPostalCode(findAddressUser(mapList, "postal_code"));
-        userAdressRepository.save(userAdress);
+        userAdressRepository.save(userAdress);*/
         replyMessageService.replyMessage(TextMessage.successLocation, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }
@@ -135,7 +136,7 @@ public class AddLocation implements Handler {
         return BotState.ADRESS_ALL;
     }
 
-    public String findAddressUser(List<Map<String, Object>> mapList, String types) {
+    /*public String findAddressUser(List<Map<String, Object>> mapList, String types) {
         Map<String, Object> targetMap = null;
         for (int i = 0; i < mapList.size(); i++) {
             Map<String, Object> stringObjectMap = mapList.get(i);
@@ -157,5 +158,5 @@ public class AddLocation implements Handler {
             return null;
         }
         return (String) targetMap.get("long_name");
-    }
+    }*/
 }

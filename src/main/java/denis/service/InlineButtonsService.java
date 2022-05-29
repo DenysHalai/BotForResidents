@@ -1,4 +1,4 @@
-package denis;
+package denis.service;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 
-public class InlineButtons {
+public class InlineButtonsService {
 
     public static InlineKeyboardMarkup inlineKeyboardQueryCurrentChat(String name) {
         InlineKeyboardMarkup inlineKeyboardOne = new InlineKeyboardMarkup();

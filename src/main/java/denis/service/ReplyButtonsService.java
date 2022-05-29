@@ -1,18 +1,12 @@
 package denis.service;
 
-import denis.InlineButtons;
 import denis.model.Icon;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class ReplyButtonsService {
@@ -60,6 +54,14 @@ public class ReplyButtonsService {
         return createCase;
     }
 
+    public static ReplyKeyboardMarkup newWebApp(String title) {
+        ReplyKeyboardMarkup createCase = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
+                buttonWebApp(title)
+        ))));
+        createCase.setResizeKeyboard(true);
+        return createCase;
+    }
+
     public static ReplyKeyboardMarkup newButtons(String title1, String title2) {
         ReplyKeyboardMarkup createCase = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
                 buttonsNew(title1, false, false),
@@ -77,8 +79,14 @@ public class ReplyButtonsService {
         return buttonFirst;
     }
 
+    public static KeyboardButton buttonWebApp(String titleButtons) {
+        KeyboardButton buttonFirst = new KeyboardButton();
+        buttonFirst.setText(titleButtons);
+        buttonFirst.setWebApp(new WebAppInfo("https://bot-vue.vercel.app/"));
+        return buttonFirst;
+    }
+
     public static KeyboardButton buttonsNew(String titleButtons) {
         return buttonsNew(titleButtons, false, false);
     }
-
 }

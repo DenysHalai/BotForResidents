@@ -1,7 +1,7 @@
 package denis.handlers;
 
-import denis.ExecutionContext;
-import denis.model.BotState;
+import denis.states.ExecutionContext;
+import denis.states.BotState;
 import denis.model.Handler;
 import denis.model.TextMessage;
 import denis.service.ReplyButtonsService;

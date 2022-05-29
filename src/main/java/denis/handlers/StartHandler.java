@@ -1,9 +1,9 @@
 package denis.handlers;
 
-import denis.ExecutionContext;
+import denis.states.ExecutionContext;
 import denis.service.ReplyButtonsService;
 import denis.model.Handler;
-import denis.model.BotState;
+import denis.states.BotState;
 import denis.model.TextMessage;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class StartHandler implements Handler {
         if (executionContext.getUser().getPhoneNumber() == null) {
             executionContext.getReplyMessageService().replyMessage(TextMessage.helloMessage, ReplyButtonsService.startButton());
         } else {
-            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
+            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.newWebApp("Приложение"));
         }
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }

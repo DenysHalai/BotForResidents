@@ -1,7 +1,6 @@
-package denis;
+package denis.states;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import denis.model.BotState;
 import denis.model.User;
 import denis.repository.UserRepository;
 import denis.service.ReplyMessageService;

@@ -1,17 +1,17 @@
 package denis;
 
 import denis.cache.UserDataCache;
-import denis.googleMapsApi.GeodecodingSample;
-import denis.model.*;
+import denis.model.Handler;
+import denis.model.TextMessage;
 import denis.model.User;
-import denis.repository.UserAdressRepository;
 import denis.repository.UserRepository;
+import denis.service.InlineLocationModeService;
 import denis.service.ReplyButtonsService;
 import denis.service.ReplyMessageService;
+import denis.states.BotState;
+import denis.states.ExecutionContext;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,6 @@ import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResult;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     List<Handler> handlerList = new ArrayList<>();
 
     @Autowired
-    private InlineLocationMode inlineLocationMode;
+    private InlineLocationModeService inlineLocationMode;
 
     private UserDataCache userDataCache;
 
@@ -67,7 +66,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     private void handleInlineQuery(InlineQuery inlineQuery) {
         List<InlineQueryResult> inlineQueryResults = inlineLocationMode.execute(inlineQuery);
         try {
-            execute(AnswerInlineQuery.builder().inlineQueryId(inlineQuery.getId()).results(inlineQueryResults).build());
+            execute(AnswerInlineQuery.builder().inlineQueryId(inlineQuery.getId()).results(inlineQueryResults).cacheTime(5).build());
         } catch (Exception e){
             throw new RuntimeException(e);
         }

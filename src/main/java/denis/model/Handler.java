@@ -1,7 +1,7 @@
 package denis.model;
 
-import denis.ExecutionContext;
-import denis.model.BotState;
+import denis.states.BotState;
+import denis.states.ExecutionContext;
 
 import java.io.IOException;
 

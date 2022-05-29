@@ -1,10 +1,9 @@
 package denis.handlers;
 
-import denis.CaseLocalState;
-import denis.ExecutionContext;
-import denis.InlineButtons;
+import denis.states.CaseLocalState;
+import denis.states.ExecutionContext;
 import denis.service.ReplyButtonsService;
-import denis.model.BotState;
+import denis.states.BotState;
 import denis.model.Case;
 import denis.model.Handler;
 import denis.model.TextMessage;
@@ -12,8 +11,6 @@ import denis.repository.CaseRepository;
 import denis.service.ReplyMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;

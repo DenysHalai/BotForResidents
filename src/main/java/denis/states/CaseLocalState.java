@@ -1,4 +1,4 @@
-package denis;
+package denis.states;
 
 import lombok.Data;
 

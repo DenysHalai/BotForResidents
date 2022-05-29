@@ -1,4 +1,4 @@
-package denis;
+package denis.service;
 
 import denis.model.DataBaseAddress;
 import denis.repository.DataBaseAddressRepository;
@@ -13,15 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
-public class InlineLocationMode {
+public class InlineLocationModeService {
 
     @Autowired
     private DataBaseAddressRepository dataBaseAddressRepository;
 
     public List<InlineQueryResult> execute(InlineQuery inlineQuery) {
-        List<DataBaseAddress> byLastnameOrFirstname = new ArrayList<>();
+        List<DataBaseAddress> byLastnameOrFirstname;
         String line = inlineQuery.getQuery();
         String title = inlineQuery.getQuery();
         String street = null;
@@ -56,11 +57,19 @@ public class InlineLocationMode {
         List<InlineQueryResult> inlineQueryResults = byLastnameOrFirstname.stream().map((Function<DataBaseAddress, InlineQueryResult>) dataBaseAddress -> {
             InlineQueryResultArticle inlineQueryResultArticle = new InlineQueryResultArticle(dataBaseAddress.getId().toString(),
                     dataBaseAddress.getTitle(),
-                    new InputTextMessageContent(dataBaseAddress.getTitle() + " " + dataBaseAddress.getStreet() + " " + dataBaseAddress.getNumber())
+                    new InputTextMessageContent(dataBaseAddress.getTitle() + " " + dataBaseAddress.getStreet() + " " + dataBaseAddress.getNumber() + "\n" + "#" + dataBaseAddress.getId())
             );
             inlineQueryResultArticle.setDescription(dataBaseAddress.getStreet() + " " + dataBaseAddress.getNumber());
             return inlineQueryResultArticle;
-        }).toList();
+        }).collect(Collectors.toList());
         return inlineQueryResults;
+    }
+
+    public List<DataBaseAddress> findUserAddress(String city, String street, String number) {
+        List<DataBaseAddress> byLastnameOrFirstname = dataBaseAddressRepository.findByLastnameOrFirstname(city, street, number);
+        if (byLastnameOrFirstname.size() > 1) {
+
+        }
+        return byLastnameOrFirstname;
     }
 }

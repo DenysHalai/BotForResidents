@@ -1,6 +1,6 @@
 package denis.cache;
 
-import denis.model.BotState;
+import denis.states.BotState;
 import denis.model.User;
 import denis.repository.UserRepository;
 

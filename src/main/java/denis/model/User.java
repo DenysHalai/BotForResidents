@@ -1,5 +1,6 @@
 package denis.model;
 
+import denis.states.BotState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package denis;
+package denis.states;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import denis.model.DataBaseAddress;

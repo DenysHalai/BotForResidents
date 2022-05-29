@@ -1,6 +1,5 @@
 package denis.repository;
 
-import denis.model.Case;
 import denis.model.UserAdress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
