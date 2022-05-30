@@ -14,7 +14,7 @@ public class StartHandler implements Handler {
         if (executionContext.getUser().getPhoneNumber() == null) {
             executionContext.getReplyMessageService().replyMessage(TextMessage.helloMessage, ReplyButtonsService.startButton());
         } else {
-            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.newWebApp("Приложение"));
+            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.newWebAppAndButtons("Мої звернення","https://bot-vue.vercel.app/allcases?userId=" + executionContext.getUser().getUserId(),"Інструкції по боту"));
         }
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }

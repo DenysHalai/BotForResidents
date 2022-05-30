@@ -7,6 +7,6 @@ public enum BotState {
     BACK_TO_MENU,
     MAIN_MENU,
     HELP_MENU,
-    ADRESS_ALL,
+    ADDRESS_ALL,
     CASE_ALL;
 }

@@ -21,27 +21,21 @@ public class DataBaseAddress {
     private Long id;
 
     @Column(name = "region")
-    @NotNull
     private String region;
 
     @Column(name = "district")
-    @NotNull
     private String district;
 
     @Column(name = "title")
-    @NotNull
     private String title;
 
     @Column(name = "zip")
-    @NotNull
     private String zip;
 
     @Column(name = "street")
-    @NotNull
     private String street;
 
     @Column(name = "number")
-    @NotNull
     private String number;
 
     @Column(name = "lat")

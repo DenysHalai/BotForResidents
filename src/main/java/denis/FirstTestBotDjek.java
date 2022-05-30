@@ -67,7 +67,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
         List<InlineQueryResult> inlineQueryResults = inlineLocationMode.execute(inlineQuery);
         try {
             execute(AnswerInlineQuery.builder().inlineQueryId(inlineQuery.getId()).results(inlineQueryResults).cacheTime(5).build());
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -75,6 +75,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     private void handleMessage(Message message) throws IOException {
         Optional<User> byChatId = userRepository.findByChatId(message.getChatId());
         User user;
+
 
         // проверка наличия юзера в БД
         if (byChatId.isPresent()) {
@@ -86,6 +87,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             userRepository.save(user);
         }
         ReplyMessageService replyMessageService = new ReplyMessageService(user.getChatId(), this);
+        ExecutionContext executionContext = new ExecutionContext(user, replyMessageService, userRepository, message);
 
         // проверка наличия телефона у юзера в БД
         if (user.getPhoneNumber() == null) {
@@ -93,10 +95,17 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             userRepository.save(user);
         }
 
-        if (message.hasText() || message.hasEntities() || message.hasLocation()) {
+        if (!executionContext.getWebAppData().isEmpty()) {
+            String state = executionContext.getWebAppData().get("state");
+            if (state != null) {
+                user.setBot_state(BotState.valueOf(state));
+            }
+        }
+
+        if (message.hasText() || message.hasEntities() || message.hasLocation() || user.getBot_state().equals(BotState.ADDRESS_ALL) || message.getWebAppData() != null) {
             for (Handler handler : handlerList) {
-                if (handler.state().equals(user.getBot_state()) || message.getText().equals(handler.commandName())) {
-                    handler.execute(new ExecutionContext(user, replyMessageService, userRepository, message));
+                if (handler.state().equals(user.getBot_state()) || handler.commandName().equals(message.getText())) {
+                    handler.execute(executionContext);
                     break;
                 }
             }
@@ -105,9 +114,10 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             user.setName(contact.getFirstName());
             user.setPhoneNumber(contact.getPhoneNumber());
             userRepository.save(user);
-            replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newButtons("Додати адресу"));
+            replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newWebApp("Додати адресу", "https://bot-vue.vercel.app/location"));
+            executionContext.setGlobalState(BotState.ADDRESS_ALL);
         } else {
-            replyMessageService.replyMessage(TextMessage.erorMessage, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
+            replyMessageService.replyMessage(TextMessage.erorMessage, ReplyButtonsService.newWebAppAndButtons("Мої звернення", "https://bot-vue.vercel.app/allcases?userId=" + user.getId(), "Інструкції по боту"));
         }
     }
 }

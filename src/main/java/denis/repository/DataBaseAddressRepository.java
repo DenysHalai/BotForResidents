@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
@@ -29,4 +30,6 @@ public interface DataBaseAddressRepository extends JpaRepository<DataBaseAddress
 
     @Query(nativeQuery = true, value = "SELECT DISTINCT street FROM data_base_address where upper(street) like upper(concat('%', ?1, '%')) limit 50")
     List<String> findUniqStreet(String street);
+
+    Optional<DataBaseAddress> findOneByTitleIgnoreCaseAndStreetIgnoreCaseAndNumberIgnoreCase(String title, String street, String number);
 }

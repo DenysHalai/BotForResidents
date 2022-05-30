@@ -12,6 +12,7 @@ import denis.service.ReplyMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,9 @@ public class MyCase implements Handler {
             localState = new CaseLocalState();
         }
         String nextStep = localState.getNextStep();
-        if (nextStep == null) {
+        if (("Мої звернення").equals(executionContext.getMessage().getWebAppData().getButtonText())) {
+            nextStep = "Створення нового звернення - WebApp";
+        } else if (nextStep == null) {
             nextStep = "";
         } else if (nextStep.equals("allCases")) {
             nextStep = executionContext.getMessage().getText();
@@ -61,6 +64,17 @@ public class MyCase implements Handler {
             case "Список всіх зверненнь":
                 replyMessageService.replyMessage(oneCases(executionContext.getUser().getUserId()), ReplyButtonsService.newButtons("Створити звернення", "До головного меню"));
                 executionContext.setGlobalState(BotState.CASE_ALL);
+                break;
+            case "Створення нового звернення - WebApp":
+                Case newCase = new Case();
+                newCase.setDescription(executionContext.getWebAppData().get("description"));
+                newCase.setTitle(executionContext.getWebAppData().get("title"));
+                newCase.setDate(ZonedDateTime.now());
+                newCase.setUserId(Long.valueOf(executionContext.getWebAppData().get("userId")));
+                newCase.setStatus("Нове");
+                caseRepository.save(newCase);
+                replyMessageService.replyMessage(TextMessage.clickCaseCreateSuccess, ReplyButtonsService.newWebAppAndButtons("Мої звернення", "https://bot-vue.vercel.app/allcases?userId=" + executionContext.getUser().getId(), "Інструкції по боту"));
+                executionContext.setGlobalState(BotState.MAIN_MENU);
                 break;
             default:
                 replyMessageService.replyMessage(TextMessage.clickCaseMainMenu, ReplyButtonsService.newButtons("Створити звернення", "Список всіх зверненнь"));

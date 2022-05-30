@@ -1,17 +1,19 @@
 package denis.handlers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import denis.controllers.LocationData;
 import denis.model.Handler;
 import denis.model.TextMessage;
-import denis.model.UserAdress;
+import denis.model.UserAddress;
+import denis.service.FindAddressInDataBaseService;
 import denis.states.AddressLocalState;
 import denis.states.BotState;
 import denis.states.ExecutionContext;
 import denis.service.InlineButtonsService;
 import denis.googleMapsApi.GeodecodingSample;
-import denis.repository.UserAdressRepository;
+import denis.repository.UserAddressRepository;
 import denis.service.ReplyButtonsService;
 import denis.service.ReplyMessageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,8 +22,13 @@ import java.util.Map;
 @Component
 public class AddLocation implements Handler {
 
-    @Autowired
-    private UserAdressRepository userAdressRepository;
+    private UserAddressRepository userAddressRepository;
+    private final FindAddressInDataBaseService findAddressInDataBaseService;
+
+    public AddLocation(UserAddressRepository userAddressRepository, FindAddressInDataBaseService findAddressInDataBaseService) {
+        this.userAddressRepository = userAddressRepository;
+        this.findAddressInDataBaseService = findAddressInDataBaseService;
+    }
 
     @Override
     public void execute(ExecutionContext executionContext) throws IOException {
@@ -36,6 +43,8 @@ public class AddLocation implements Handler {
             nextStep = "Так, це моя адреса";
         } else if (("Вказати адресу вручну").equals(executionContext.getMessage().getText())) {
             nextStep = "Вказати адресу вручну";
+        } else if (("Додати адресу").equals(executionContext.getMessage().getWebAppData().getButtonText())) {
+            nextStep = "Додати адресу - WebApp";
         }
         if (nextStep == null) {
             nextStep = "";
@@ -43,11 +52,10 @@ public class AddLocation implements Handler {
             nextStep = executionContext.getMessage().getText();
         }
         if (executionContext.getMessage().hasLocation()) {
-            Map<String, Object> location = param.geodecodingSample(executionContext.getMessage().getLocation().getLatitude().toString(),
+            LocationData location = param.geodecodingSample(executionContext.getMessage().getLocation().getLatitude().toString(),
                     executionContext.getMessage().getLocation().getLongitude().toString());
             localState.setLocation(location);
-
-            replyMessageService.replyMessage(("Ваш адрес: " + location.get("settlement_type") + " " + location.get("settlement") + ", " + location.get("street_type") + " " + location.get("street") + ", " + location.get("name")), ReplyButtonsService.newButtons("Так, це моя адреса", "Ні, адреса не вірна"));
+            replyMessageService.replyMessage(("Ваш адрес: " + location.getCityType() + " " + location.getCity() + ", " + location.getStreetType() + " " + location.getStreet() + ", " + location.getNumber()), ReplyButtonsService.newButtons("Так, це моя адреса", "Ні, адреса не вірна"));
         } else {
             switch (nextStep) {
                 case "Так, це моя адреса": {
@@ -57,7 +65,7 @@ public class AddLocation implements Handler {
                 }
                 case "Ні, адреса не вірна": {
                     replyMessageService.replyMessage("Натисніть кнопку, щоб поділитися своєю адресою:", ReplyButtonsService.geoButton());
-                    executionContext.setGlobalState(BotState.ADRESS_ALL);
+                    executionContext.setGlobalState(BotState.ADDRESS_ALL);
                     localState.setNextStep(null);
                     localState.setLocation(null);
                 }
@@ -73,8 +81,7 @@ public class AddLocation implements Handler {
                     break;
                 }
                 case "Ввод номеру квартири": {
-                    UserAdress userAdress = new UserAdress();
-                    Map<String, Object> location = localState.getLocation();
+                    UserAddress userAddress = new UserAddress();
                     /*
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) location.get("results");
                     userAdress.setUserId(executionContext.getMessage().getChatId());
@@ -88,7 +95,7 @@ public class AddLocation implements Handler {
                     userAdress.setPostalCode(findAddressUser(mapList, "postal_code"));
                     userAdressRepository.save(userAdress);*/
                     executionContext.setGlobalState(BotState.MAIN_MENU);
-                    replyMessageService.replyMessage(TextMessage.successLocation, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
+                    replyMessageService.replyMessage(TextMessage.successLocation, ReplyButtonsService.newWebAppAndButtons("Мої звернення","https://bot-vue.vercel.app/allcases?userId=" + executionContext.getUser().getUserId(),"Інструкції по боту"));
                     break;
                 }
                 case "Вказати адресу вручну": {
@@ -101,17 +108,24 @@ public class AddLocation implements Handler {
                     replyMessageService.replyMessage("Це багатоквартирний будинок?", ReplyButtonsService.newButtons("Так", "Ні"));
                     localState.setNextStep("Багатоквартирний будинок");
                 }
+                case "Додати адресу - WebApp":
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, String> map = mapper.readValue(executionContext.getMessage().getWebAppData().getData(), Map.class);
+                    findAddressInDataBaseService.tryFindAddress(map.get("city"), map.get("street"), map.get("number"), executionContext.getUser().getId(), map.get("numberApart"));
+                    replyMessageService.replyMessage(TextMessage.successLocation, ReplyButtonsService.newWebAppAndButtons("Мої звернення","https://bot-vue.vercel.app/allcases?userId=" + executionContext.getUser().getUserId(),"Інструкції по боту"));
+                    executionContext.setGlobalState(BotState.MAIN_MENU);
+                    break;
                 default:
                     replyMessageService.replyMessage("Натисніть кнопку, щоб поділитися своєю адресою:", ReplyButtonsService.geoButton());
-                    executionContext.setGlobalState(BotState.ADRESS_ALL);
+                    executionContext.setGlobalState(BotState.ADDRESS_ALL);
             }
         }
         executionContext.setLocalState(localState);
     }
 
     private void extracted(ExecutionContext executionContext, AddressLocalState localState, ReplyMessageService replyMessageService) {
-        UserAdress userAdress = new UserAdress();
-        Map<String, Object> location = localState.getLocation();/*
+        UserAddress userAddress = new UserAddress();/*
+        Map<String, Object> location = localState.getLocation();
         List<Map<String, Object>> mapList = (List<Map<String, Object>>) location.get("results");
         userAdress.setUserId(executionContext.getMessage().getChatId());
         userAdress.setCountry(findAddressUser(mapList, "country"));
@@ -133,7 +147,7 @@ public class AddLocation implements Handler {
 
     @Override
     public BotState state() {
-        return BotState.ADRESS_ALL;
+        return BotState.ADDRESS_ALL;
     }
 
     /*public String findAddressUser(List<Map<String, Object>> mapList, String types) {

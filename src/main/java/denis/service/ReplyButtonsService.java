@@ -30,7 +30,7 @@ public class ReplyButtonsService {
 
     public static ReplyKeyboardMarkup mainMenuButtons() {
         ReplyKeyboardMarkup mainMenuButtons = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
-                buttonsNew("Мої звернення"),
+                buttonWebApp("Мої звернення", "https://bot-vue.vercel.app/allcases?userId="),
                 buttonsNew("Інструкції по боту", false, false)
         ))));
         mainMenuButtons.setResizeKeyboard(true);
@@ -54,9 +54,28 @@ public class ReplyButtonsService {
         return createCase;
     }
 
-    public static ReplyKeyboardMarkup newWebApp(String title) {
+    public static ReplyKeyboardMarkup newWebApp(String title, String url) {
         ReplyKeyboardMarkup createCase = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
-                buttonWebApp(title)
+                buttonWebApp(title, url)
+        ))));
+        createCase.setResizeKeyboard(true);
+        return createCase;
+    }
+
+    public static ReplyKeyboardMarkup newWebAppAndButtons(String titleButtonWebApp, String url, String titleButtonFree) {
+        ReplyKeyboardMarkup createCase = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
+                buttonWebApp(titleButtonWebApp, url),
+                buttonsNew(titleButtonFree)
+        ))));
+        createCase.setResizeKeyboard(true);
+        return createCase;
+    }
+
+    public static ReplyKeyboardMarkup newButtons(String title1, String title2, String title3) {
+        ReplyKeyboardMarkup createCase = new ReplyKeyboardMarkup(Collections.singletonList(new KeyboardRow(List.of(
+                buttonsNew(title1, false, false),
+                buttonsNew(title2, false, false),
+                buttonsNew(title3, false, false)
         ))));
         createCase.setResizeKeyboard(true);
         return createCase;
@@ -79,10 +98,10 @@ public class ReplyButtonsService {
         return buttonFirst;
     }
 
-    public static KeyboardButton buttonWebApp(String titleButtons) {
+    public static KeyboardButton buttonWebApp(String titleButtons, String url) {
         KeyboardButton buttonFirst = new KeyboardButton();
         buttonFirst.setText(titleButtons);
-        buttonFirst.setWebApp(new WebAppInfo("https://bot-vue.vercel.app/"));
+        buttonFirst.setWebApp(new WebAppInfo(url));
         return buttonFirst;
     }
 

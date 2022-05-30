@@ -7,6 +7,9 @@ import denis.service.ReplyMessageService;
 import lombok.Value;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Value
 public class ExecutionContext {
     ObjectMapper mapper = new ObjectMapper();
@@ -18,10 +21,10 @@ public class ExecutionContext {
 
     public void setGlobalState(BotState state) {
         user.setBot_state(state);
-        userRepository.save(user);
         if (state == BotState.MAIN_MENU){
             setLocalState(null);
         }
+        userRepository.save(user);
     }
 
     public void setLocalState(String state) {
@@ -55,6 +58,17 @@ public class ExecutionContext {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Map<String, String> getWebAppData(){
+        if (message.getWebAppData() != null){
+            try {
+                return mapper.readValue(message.getWebAppData().getData(), Map.class);
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+        return new HashMap<>();
     }
 }
 

@@ -6,36 +6,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "cases")
+@Table(name = "userAddress")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Case {
+public class UserAddress {
     @Id
     @Column(name = "id")
     @GeneratedValue
     private Long id;
 
     @Column(name = "user_id")
-    @NotNull
     private Long userId;
 
-    @Column(name = "date")
-    private ZonedDateTime date;
+    @Column(name = "address_id")
+    private Long addressId;
 
-    @Column(name = "title")
-    private String title;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "status")
-    private String status;
-
+    @Column(name = "apartmentNumber")
+    private String apartmentNumber;
 }
