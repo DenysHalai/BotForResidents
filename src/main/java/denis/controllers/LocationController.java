@@ -1,6 +1,8 @@
 package denis.controllers;
 
 import denis.googleMapsApi.GeodecodingSample;
+import denis.model.LocationData;
+import denis.model.LocationDataDataBase;
 import denis.repository.DataBaseAddressRepository;
 import denis.service.FindAddressInDataBaseService;
 import org.springframework.web.bind.annotation.*;

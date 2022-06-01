@@ -1,18 +1,17 @@
 package denis;
 
-import denis.cache.UserDataCache;
-import denis.model.Handler;
+import denis.handlers.Handler;
 import denis.model.TextMessage;
 import denis.model.User;
 import denis.repository.UserRepository;
+import denis.service.Buttons.ButtonsTemplate;
 import denis.service.InlineLocationModeService;
-import denis.service.ReplyButtonsService;
+import denis.service.Buttons.ReplyButtonsService;
 import denis.service.ReplyMessageService;
 import denis.states.BotState;
 import denis.states.ExecutionContext;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -22,7 +21,6 @@ import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResult;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,20 +32,19 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     @Getter
     private String botUsername;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    List<Handler> handlerList = new ArrayList<>();
-
-    @Autowired
-    private InlineLocationModeService inlineLocationMode;
-
-    private UserDataCache userDataCache;
+    private final UserRepository userRepository;
+    private final List<Handler> handlerList;
+    private final InlineLocationModeService inlineLocationMode;
 
     @Value("${bot.token}")
     @Getter
     private String botToken;
+
+    public FirstTestBotDjek(UserRepository userRepository, List<Handler> handlerList, InlineLocationModeService inlineLocationMode) {
+        this.userRepository = userRepository;
+        this.handlerList = handlerList;
+        this.inlineLocationMode = inlineLocationMode;
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -59,7 +56,7 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
                 handleInlineQuery(update.getInlineQuery());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -76,7 +73,6 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
         Optional<User> byChatId = userRepository.findByChatId(message.getChatId());
         User user;
 
-
         // проверка наличия юзера в БД
         if (byChatId.isPresent()) {
             user = byChatId.get();
@@ -86,7 +82,8 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             user.setUserId(message.getFrom().getId());
             userRepository.save(user);
         }
-        ReplyMessageService replyMessageService = new ReplyMessageService(user.getChatId(), this);
+
+        ReplyMessageService replyMessageService = new ReplyMessageService(user.getChatId(), this, user);
         ExecutionContext executionContext = new ExecutionContext(user, replyMessageService, userRepository, message);
 
         // проверка наличия телефона у юзера в БД
@@ -114,10 +111,13 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             user.setName(contact.getFirstName());
             user.setPhoneNumber(contact.getPhoneNumber());
             userRepository.save(user);
-            replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newWebApp("Додати адресу", "https://bot-vue.vercel.app/location"));
+            replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newKeyboardButton(
+                    ButtonsTemplate.builder()
+                            .title("Додати адресу")
+                            .webAppUrl("https://bot-vue.vercel.app/location").build()));
             executionContext.setGlobalState(BotState.ADDRESS_ALL);
         } else {
-            replyMessageService.replyMessage(TextMessage.erorMessage, ReplyButtonsService.newWebAppAndButtons("Мої звернення", "https://bot-vue.vercel.app/allcases?userId=" + user.getId(), "Інструкції по боту"));
+            replyMessageService.replyWithMainMenu();
         }
     }
 }

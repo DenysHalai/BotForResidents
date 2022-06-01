@@ -1,20 +1,22 @@
 package denis.handlers;
 
+import denis.service.Buttons.ButtonsTemplate;
 import denis.states.ExecutionContext;
-import denis.service.ReplyButtonsService;
-import denis.model.Handler;
+import denis.service.Buttons.ReplyButtonsService;
 import denis.states.BotState;
 import denis.model.TextMessage;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class StartHandler implements Handler {
     @Override
     public void execute(ExecutionContext executionContext) {
         if (executionContext.getUser().getPhoneNumber() == null) {
-            executionContext.getReplyMessageService().replyMessage(TextMessage.helloMessage, ReplyButtonsService.startButton());
+            executionContext.getReplyMessageService().replyMessage(TextMessage.helloMessage, ReplyButtonsService.newKeyboardButton(ButtonsTemplate.builder().title("Натисніть щоб відправити телефон").requestContact(true).build()));
         } else {
-            executionContext.getReplyMessageService().replyMessage(TextMessage.erorMessage, ReplyButtonsService.newWebAppAndButtons("Мої звернення","https://bot-vue.vercel.app/allcases?userId=" + executionContext.getUser().getUserId(),"Інструкції по боту"));
+            executionContext.getReplyMessageService().replyWithMainMenu();
         }
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }

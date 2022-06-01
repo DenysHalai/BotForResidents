@@ -1,14 +1,10 @@
 package denis.googleMapsApi;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import denis.controllers.LocationData;
+import denis.model.LocationData;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.google.common.collect.Maps;
 
 public class GeodecodingSample extends AbstractSample {
 

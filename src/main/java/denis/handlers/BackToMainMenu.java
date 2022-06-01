@@ -1,17 +1,19 @@
 package denis.handlers;
 
+import denis.service.Buttons.ButtonsTemplate;
 import denis.states.ExecutionContext;
 import denis.states.BotState;
-import denis.model.Handler;
 import denis.model.TextMessage;
-import denis.service.ReplyButtonsService;
+import denis.service.Buttons.ReplyButtonsService;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class BackToMainMenu implements Handler {
     @Override
     public void execute(ExecutionContext executionContext) {
-        executionContext.getReplyMessageService().replyMessage(TextMessage.clickCaseMainMenu, ReplyButtonsService.newButtons("Мої звернення", "Інструкції по боту"));
+        executionContext.getReplyMessageService().replyWithMainMenu();
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }
 

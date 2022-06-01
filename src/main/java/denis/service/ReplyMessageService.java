@@ -2,21 +2,26 @@ package denis.service;
 
 import denis.FirstTestBotDjek;
 import denis.model.TextMessage;
+import denis.model.User;
+import denis.service.Buttons.ButtonsTemplate;
+import denis.service.Buttons.ReplyButtonsService;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+
+import java.util.List;
 
 public class ReplyMessageService {
     private final long chatId;
     private final FirstTestBotDjek bot;
+    private final User user;
 
-    public ReplyMessageService(long chatId, FirstTestBotDjek bot) {
+    public ReplyMessageService(long chatId, FirstTestBotDjek bot, User user) {
         this.chatId = chatId;
         this.bot = bot;
+        this.user = user;
     }
 
     public Message replyMessage(String textMessage, ReplyKeyboard replyKeyboard) {
@@ -49,21 +54,7 @@ public class ReplyMessageService {
     }
 
     public Message replyMessage(String textMessage) {
-       return replyMessage(textMessage, true);
-    }
-
-    public void editMessageReplyMarkup(Integer messageId, InlineKeyboardMarkup replyKeyboard) {
-        try {
-            bot.execute(
-                    EditMessageReplyMarkup
-                            .builder()
-                            .messageId(messageId)
-                            .chatId(String.valueOf(chatId))
-                            .replyMarkup(replyKeyboard)
-                            .build());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return replyMessage(textMessage, true);
     }
 
     public void deleteMessage(Integer messageId) {
@@ -82,5 +73,19 @@ public class ReplyMessageService {
     public void hideButtons() {
         Message message = replyMessage("...");
         deleteMessage(message.getMessageId());
+    }
+
+    public void replyWithMainMenu(TextMessage textMessage) {
+        replyMessage(textMessage, ReplyButtonsService.newKeyboardButton(List.of(
+                ButtonsTemplate.builder()
+                        .title("Мої звернення")
+                        .build(),
+                ButtonsTemplate.builder()
+                        .title("Інструкції по боту")
+                        .build())));
+    }
+
+    public void replyWithMainMenu() {
+        replyWithMainMenu(TextMessage.clickCaseMainMenu);
     }
 }

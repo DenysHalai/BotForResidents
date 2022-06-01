@@ -1,4 +1,4 @@
-package denis.controllers;
+package denis.model;
 
 import lombok.Value;
 

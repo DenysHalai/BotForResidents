@@ -1,7 +1,7 @@
 package denis.service;
 
-import denis.controllers.LocationData;
-import denis.controllers.LocationDataDataBase;
+import denis.model.LocationData;
+import denis.model.LocationDataDataBase;
 import denis.model.DataBaseAddress;
 import denis.model.UserAddress;
 import denis.repository.DataBaseAddressRepository;

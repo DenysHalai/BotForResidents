@@ -1,4 +1,4 @@
-package denis.model;
+package denis.handlers;
 
 import denis.states.BotState;
 import denis.states.ExecutionContext;

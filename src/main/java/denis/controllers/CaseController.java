@@ -3,11 +3,9 @@ package denis.controllers;
 import denis.model.Case;
 import denis.repository.CaseRepository;
 import org.springframework.web.bind.annotation.*;
-
-import javax.ws.rs.PathParam;
 import java.util.List;
 
-@CrossOrigin(origins = {"https://bot-vue.vercel.app","https://305b-93-170-55-154.eu.ngrok.io"})
+@CrossOrigin(origins = {"https://bot-vue.vercel.app","https://83f0-104-28-224-95.eu.ngrok.io"})
 @RestController
 public class CaseController {
 
