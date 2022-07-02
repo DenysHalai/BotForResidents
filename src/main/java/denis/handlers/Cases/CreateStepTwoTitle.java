@@ -6,20 +6,20 @@ import denis.states.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CreateCaseStepOne implements CasesTemplate{
-
+public class CreateStepTwoTitle implements TemplateCases {
     @Override
     public void execute(ExecutionContext executionContext, CaseLocalState localState) {
-        executionContext.getReplyMessageService().replyMessage(TextMessage.clickCaseCreateStep1);
+        executionContext.getReplyMessageServiceResident().replyMessage(TextMessage.clickCaseCreateStep2);
+        localState.setTitle(executionContext.getMessage().getText());
     }
 
     @Override
     public String nextStep() {
-        return "createCaseTitle";
+        return "createCaseDesc";
     }
 
     @Override
     public String commandName() {
-        return "Створити звернення";
+        return "createCaseTitle";
     }
 }

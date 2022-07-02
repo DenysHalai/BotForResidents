@@ -7,16 +7,14 @@ import denis.states.BotState;
 import denis.model.TextMessage;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class StartHandler implements Handler {
     @Override
     public void execute(ExecutionContext executionContext) {
         if (executionContext.getUser().getPhoneNumber() == null) {
-            executionContext.getReplyMessageService().replyMessage(TextMessage.helloMessage, ReplyButtonsService.newKeyboardButton(ButtonsTemplate.builder().title("Натисніть щоб відправити телефон").requestContact(true).build()));
+            executionContext.getReplyMessageServiceResident().replyMessage(TextMessage.helloMessage, ReplyButtonsService.newKeyboardButton(ButtonsTemplate.builder().title("Натисніть щоб відправити телефон").requestContact(true).build()));
         } else {
-            executionContext.getReplyMessageService().replyWithMainMenu();
+            executionContext.getReplyMessageServiceResident().replyWithMainMenu();
         }
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }
@@ -29,5 +27,10 @@ public class StartHandler implements Handler {
     @Override
     public BotState state() {
         return BotState.NEW_USER;
+    }
+
+    @Override
+    public MainScreen mainScreen() {
+        return null;
     }
 }

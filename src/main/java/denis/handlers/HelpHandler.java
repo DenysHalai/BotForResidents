@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class HelpHandler implements Handler {
     @Override
     public void execute(ExecutionContext executionContext) {
-        executionContext.getReplyMessageService().replyMessage(TextMessage.clickHelpMainMenu, ReplyButtonsService.newKeyboardButton(
+        executionContext.getReplyMessageServiceResident().replyMessage(TextMessage.clickHelpMainMenu, ReplyButtonsService.newKeyboardButton(
                 ButtonsTemplate.builder()
                         .title("До головного меню")
                         .build()));
@@ -26,5 +26,10 @@ public class HelpHandler implements Handler {
     @Override
     public BotState state() {
         return BotState.HELP_MENU;
+    }
+
+    @Override
+    public MainScreen mainScreen() {
+        return null;
     }
 }

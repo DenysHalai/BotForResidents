@@ -1,6 +1,5 @@
 package denis.handlers.Cases;
 
-import denis.model.TextMessage;
 import denis.service.Buttons.ButtonsTemplate;
 import denis.service.Buttons.ReplyButtonsService;
 import denis.states.BotState;
@@ -10,11 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class AllCases implements CasesTemplate{
+public class MainMenuCases implements TemplateCases {
 
     @Override
     public void execute(ExecutionContext executionContext, CaseLocalState localState) {
-        executionContext.getReplyMessageService().replyMessage("Оберіть, що саме вас цікавить в зверненнях, натиснувши кнопку нижче:", ReplyButtonsService.newKeyboardButton(List.of(
+        executionContext.getReplyMessageServiceResident().replyMessage("Оберіть, що саме вас цікавить в зверненнях, натиснувши кнопку нижче:", ReplyButtonsService.newKeyboardButton(List.of(
                 ButtonsTemplate.builder()
                         .title("Створити звернення")
                         .build(),

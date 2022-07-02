@@ -1,13 +1,12 @@
 package denis;
 
 import denis.handlers.Handler;
-import denis.model.TextMessage;
 import denis.model.User;
 import denis.repository.UserRepository;
 import denis.service.Buttons.ButtonsTemplate;
-import denis.service.InlineLocationModeService;
 import denis.service.Buttons.ReplyButtonsService;
-import denis.service.ReplyMessageService;
+import denis.service.InlineLocationModeService;
+import denis.service.ReplyMessageServiceResident;
 import denis.states.BotState;
 import denis.states.ExecutionContext;
 import lombok.Getter;
@@ -16,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
-import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.Contact;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResult;
 
@@ -26,9 +27,9 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class FirstTestBotDjek extends TelegramLongPollingBot {
+public class CompanyBot extends TelegramLongPollingBot {
 
-    @Value("${bot.name}")
+    @Value("${bot_company.name}")
     @Getter
     private String botUsername;
 
@@ -36,11 +37,11 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     private final List<Handler> handlerList;
     private final InlineLocationModeService inlineLocationMode;
 
-    @Value("${bot.token}")
+    @Value("${bot_company.token}")
     @Getter
     private String botToken;
 
-    public FirstTestBotDjek(UserRepository userRepository, List<Handler> handlerList, InlineLocationModeService inlineLocationMode) {
+    public CompanyBot(UserRepository userRepository, List<Handler> handlerList, InlineLocationModeService inlineLocationMode) {
         this.userRepository = userRepository;
         this.handlerList = handlerList;
         this.inlineLocationMode = inlineLocationMode;
@@ -63,7 +64,11 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
     private void handleInlineQuery(InlineQuery inlineQuery) {
         List<InlineQueryResult> inlineQueryResults = inlineLocationMode.execute(inlineQuery);
         try {
-            execute(AnswerInlineQuery.builder().inlineQueryId(inlineQuery.getId()).results(inlineQueryResults).cacheTime(5).build());
+            execute(AnswerInlineQuery.builder()
+                    .inlineQueryId(inlineQuery.getId())
+                    .results(inlineQueryResults)
+                    .cacheTime(5)
+                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -83,8 +88,8 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             userRepository.save(user);
         }
 
-        ReplyMessageService replyMessageService = new ReplyMessageService(user.getChatId(), this, user);
-        ExecutionContext executionContext = new ExecutionContext(user, replyMessageService, userRepository, message);
+        ReplyMessageServiceResident replyMessageServiceResident = new ReplyMessageServiceResident(user.getChatId(), this, user);
+        ExecutionContext executionContext = new ExecutionContext(user, replyMessageServiceResident, userRepository, message);
 
         // проверка наличия телефона у юзера в БД
         if (user.getPhoneNumber() == null) {
@@ -111,13 +116,13 @@ public class FirstTestBotDjek extends TelegramLongPollingBot {
             user.setName(contact.getFirstName());
             user.setPhoneNumber(contact.getPhoneNumber());
             userRepository.save(user);
-            replyMessageService.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newKeyboardButton(
+            replyMessageServiceResident.replyMessage("Бажаєте додати адресу? Якщо так натисніть кнопку нижче:", ReplyButtonsService.newKeyboardButton(
                     ButtonsTemplate.builder()
                             .title("Додати адресу")
                             .webAppUrl("https://bot-vue.vercel.app/location").build()));
             executionContext.setGlobalState(BotState.ADDRESS_ALL);
         } else {
-            replyMessageService.replyWithMainMenu();
+            replyMessageServiceResident.replyWithMainMenu();
         }
     }
 }

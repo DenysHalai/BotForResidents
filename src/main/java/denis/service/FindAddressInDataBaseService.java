@@ -1,50 +1,46 @@
 package denis.service;
 
-import denis.model.LocationData;
-import denis.model.LocationDataDataBase;
-import denis.model.DataBaseAddress;
-import denis.model.UserAddress;
+import denis.model.*;
+import denis.repository.CityRepository;
 import denis.repository.DataBaseAddressRepository;
+import denis.repository.StreetRepository;
 import denis.repository.UserAddressRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Service
 public class FindAddressInDataBaseService {
 
     private final DataBaseAddressRepository dataBaseAddressRepository;
     private final UserAddressRepository userAddressRepository;
+    private final CityRepository cityRepository;
+    private final StreetRepository streetRepository;
 
-    public FindAddressInDataBaseService(DataBaseAddressRepository dataBaseAddressRepository, UserAddressRepository userAddressRepository) {
+    public FindAddressInDataBaseService(DataBaseAddressRepository dataBaseAddressRepository, UserAddressRepository userAddressRepository, CityRepository cityRepository, StreetRepository streetRepository) {
         this.dataBaseAddressRepository = dataBaseAddressRepository;
         this.userAddressRepository = userAddressRepository;
+        this.cityRepository = cityRepository;
+        this.streetRepository = streetRepository;
     }
 
     public LocationDataDataBase findAddressContains(LocationData locationData) {
-        List<DataBaseAddress> baseAddresses;
-        if (locationData.getNumber() != null) {
-            baseAddresses = dataBaseAddressRepository.findByLastnameOrFirstname(locationData.getCity(),
-                    locationData.getStreetType() + " " + locationData.getStreet(), locationData.getNumber());
-        } else if (locationData.getStreet() != null) {
-            baseAddresses = dataBaseAddressRepository.findByLastnameOrFirstname(locationData.getCity(),
-                    locationData.getStreetType() + " " + locationData.getStreet());
-        } else if (locationData.getCity() != null) {
-            baseAddresses = dataBaseAddressRepository.findByLastnameOrFirstname(locationData.getCity());
-        } else {
-            baseAddresses = new ArrayList<>();
-        }
+        List<DataBaseAddress> baseAddresses = dataBaseAddressRepository.findByCityAndStreet((locationData.getCityType() + " " + locationData.getCity()).toUpperCase(),
+                (locationData.getStreetType() + " " + locationData.getStreet()).toUpperCase(), locationData.getNumber().toUpperCase(), PageRequest.of(0,50));
         if (!baseAddresses.isEmpty()) {
             DataBaseAddress dataBaseAddress = baseAddresses.get(0);
-            return new LocationDataDataBase(dataBaseAddress.getTitle(), dataBaseAddress.getStreet(), dataBaseAddress.getNumber(), dataBaseAddress.getId());
+            return new LocationDataDataBase(dataBaseAddress.getStreet().getCity().getTitle(), dataBaseAddress.getStreet().getTitle(), dataBaseAddress.getNumber(), dataBaseAddress.getId());
         }
         return null;
     }
 
     public void tryFindAddress(String title, String street, String number, Long userId, String apartment) {
-        Optional<DataBaseAddress> addressList = dataBaseAddressRepository.findOneByTitleIgnoreCaseAndStreetIgnoreCaseAndNumberIgnoreCase(title, street, number);
+        Optional<DataBaseAddress> addressList = dataBaseAddressRepository.findByUserData(title, street, number);
         UserAddress userAddressNew = new UserAddress();
         if (addressList.isPresent()) {
             Long idAddress = addressList.get().getId();
@@ -55,9 +51,19 @@ public class FindAddressInDataBaseService {
             }
             userAddressRepository.save(userAddressNew);
         } else {
+            City city1 = cityRepository.findByTitle(title).orElseGet(() -> {
+                City city = new City();
+                city.setTitle(title);
+                return cityRepository.save(city);
+            });
+            Street street2 = streetRepository.findByCityTitleAndTitle(city1.getTitle(), street).orElseGet(() -> {
+                Street street1 = new Street();
+                street1.setTitle(street);
+                street1.setCity(city1);
+                return streetRepository.save(street1);
+            });
             DataBaseAddress newDataBaseAddress = new DataBaseAddress();
-            newDataBaseAddress.setTitle(title);
-            newDataBaseAddress.setStreet(street);
+            newDataBaseAddress.setStreet(street2);
             newDataBaseAddress.setNumber(number);
             Long id = dataBaseAddressRepository.save(newDataBaseAddress).getId();
             userAddressNew.setAddressId(id);

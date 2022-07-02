@@ -26,14 +26,8 @@ public class DataBaseAddress {
     @Column(name = "district")
     private String district;
 
-    @Column(name = "title")
-    private String title;
-
     @Column(name = "zip")
     private String zip;
-
-    @Column(name = "street")
-    private String street;
 
     @Column(name = "number")
     private String number;
@@ -43,4 +37,8 @@ public class DataBaseAddress {
 
     @Column(name = "lng")
     private String lng;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "street_id")
+    private Street street;
 }

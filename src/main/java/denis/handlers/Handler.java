@@ -9,4 +9,5 @@ public interface Handler {
     void execute(ExecutionContext executionContext) throws IOException;
     String commandName();
     BotState state();
+    MainScreen mainScreen();
 }

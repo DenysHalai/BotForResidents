@@ -3,7 +3,7 @@ package denis.states;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import denis.model.User;
 import denis.repository.UserRepository;
-import denis.service.ReplyMessageService;
+import denis.service.ReplyMessageServiceResident;
 import lombok.Value;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 public class ExecutionContext {
     ObjectMapper mapper = new ObjectMapper();
     User user;
-    ReplyMessageService replyMessageService;
+    ReplyMessageServiceResident replyMessageServiceResident;
     UserRepository userRepository;
     Message message;
 

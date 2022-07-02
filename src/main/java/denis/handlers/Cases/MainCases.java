@@ -1,28 +1,23 @@
 package denis.handlers.Cases;
 
 import denis.handlers.Handler;
-import denis.service.Buttons.ButtonsTemplate;
+import denis.handlers.MainScreen;
 import denis.states.CaseLocalState;
 import denis.states.ExecutionContext;
-import denis.service.Buttons.ReplyButtonsService;
 import denis.states.BotState;
-import denis.model.TextMessage;
-import denis.repository.CaseRepository;
-import denis.service.ReplyMessageService;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
-public class MyCase implements Handler {
+public class MainCases implements Handler {
 
-    private final Map<String, CasesTemplate> casesTemplateMap = new HashMap<>();
+    private final Map<String, TemplateCases> casesTemplateMap = new HashMap<>();
 
-    public MyCase(List<CasesTemplate> casesTemplateList) {
-        for (CasesTemplate casesTemplate : casesTemplateList) {
+    public MainCases(List<TemplateCases> casesTemplateList) {
+        for (TemplateCases casesTemplate : casesTemplateList) {
             casesTemplateMap.put(casesTemplate.commandName(), casesTemplate);
         }
     }
@@ -41,7 +36,7 @@ public class MyCase implements Handler {
             nextStep = executionContext.getMessage().getWebAppData().getButtonText();
         }
 
-        CasesTemplate casesTemplate = casesTemplateMap.getOrDefault(nextStep, casesTemplateMap.get("default"));
+        TemplateCases casesTemplate = casesTemplateMap.getOrDefault(nextStep, casesTemplateMap.get("default"));
         casesTemplate.execute(executionContext, localState);
         localState.setNextStep(casesTemplate.nextStep());
         executionContext.setLocalState(localState);
@@ -55,5 +50,10 @@ public class MyCase implements Handler {
     @Override
     public BotState state() {
         return BotState.CASE_ALL;
+    }
+
+    @Override
+    public MainScreen mainScreen() {
+        return null;
     }
 }

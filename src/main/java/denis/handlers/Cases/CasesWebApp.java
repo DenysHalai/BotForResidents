@@ -5,7 +5,6 @@ import denis.model.TextMessage;
 import denis.repository.CaseRepository;
 import denis.service.Buttons.ButtonsTemplate;
 import denis.service.Buttons.ReplyButtonsService;
-import denis.states.BotState;
 import denis.states.CaseLocalState;
 import denis.states.ExecutionContext;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Component
-public class CasesWebApp implements CasesTemplate{
+public class CasesWebApp implements TemplateCases {
 
     private final CaseRepository caseRepository;
 
@@ -30,7 +29,7 @@ public class CasesWebApp implements CasesTemplate{
         newCase.setUserId(Long.valueOf(executionContext.getWebAppData().get("userId")));
         newCase.setStatus("Нове");
         caseRepository.save(newCase);
-        executionContext.getReplyMessageService().replyMessage(TextMessage.clickCaseCreateSuccess, ReplyButtonsService.newKeyboardButton(List.of(
+        executionContext.getReplyMessageServiceResident().replyMessage(TextMessage.clickCaseCreateSuccess, ReplyButtonsService.newKeyboardButton(List.of(
                 ButtonsTemplate.builder()
                         .title("Створити звернення")
                         .build(),

@@ -11,17 +11,17 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 
 @Component
-public class CreateCaseStepThreeDescription implements CasesTemplate{
+public class CreateStepThreeDescription implements TemplateCases {
 
     private final CaseRepository caseRepository;
 
-    public CreateCaseStepThreeDescription(CaseRepository caseRepository) {
+    public CreateStepThreeDescription(CaseRepository caseRepository) {
         this.caseRepository = caseRepository;
     }
 
     @Override
     public void execute(ExecutionContext executionContext, CaseLocalState localState) {
-        executionContext.getReplyMessageService().replyWithMainMenu(TextMessage.clickCaseCreateSuccess);
+        executionContext.getReplyMessageServiceResident().replyWithMainMenu(TextMessage.clickCaseCreateSuccess);
         executionContext.setGlobalState(BotState.MAIN_MENU);
         localState.setDescription(executionContext.getMessage().getText());
         Case newCase = new Case();

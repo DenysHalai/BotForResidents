@@ -1,15 +1,21 @@
 package denis.controllers;
 
 import denis.googleMapsApi.GeodecodingSample;
+import denis.model.City;
 import denis.model.LocationData;
 import denis.model.LocationDataDataBase;
+import denis.model.Street;
+import denis.repository.CityRepository;
 import denis.repository.DataBaseAddressRepository;
+import denis.repository.StreetRepository;
 import denis.service.FindAddressInDataBaseService;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "https://bot-vue.vercel.app")
 @RestController
@@ -17,24 +23,25 @@ public class LocationController {
 
     private final DataBaseAddressRepository dataBaseAddressRepository;
     private final FindAddressInDataBaseService findAddressInDataBaseService;
+    private final CityRepository cityRepository;
+    private final StreetRepository streetRepository;
 
-    public LocationController(DataBaseAddressRepository dataBaseAddressRepository, FindAddressInDataBaseService findAddressInDataBaseService) {
+    public LocationController(DataBaseAddressRepository dataBaseAddressRepository, FindAddressInDataBaseService findAddressInDataBaseService, CityRepository cityRepository, StreetRepository streetRepository) {
         this.dataBaseAddressRepository = dataBaseAddressRepository;
         this.findAddressInDataBaseService = findAddressInDataBaseService;
+        this.cityRepository = cityRepository;
+        this.streetRepository = streetRepository;
     }
 
-    @GetMapping("/location/{column}")
-    public List<String> findUserEndpoint(@PathVariable String column, @RequestParam String value) {
+    @GetMapping("/location/")
+    public List<String> findUserEndpoint(@RequestParam String cityName, @RequestParam(required = false) String streetName) {
         List<String> resultList;
-        switch (column) {
-            case "city":
-                resultList = dataBaseAddressRepository.findUniqTitle(value);
-                break;
-            case "street":
-                resultList = dataBaseAddressRepository.findUniqStreet(value);
-                break;
-            default:
-                resultList = new ArrayList<>();
+        if (cityName != null && streetName == null) {
+            resultList = cityRepository.findByTitleContainingIgnoreCase(cityName).stream().map(City::getTitle).collect(Collectors.toList());
+        } else if (streetName != null) {
+            resultList = streetRepository.findCityAndStreet(cityName, streetName).stream().map(Street::getTitle).collect(Collectors.toList());
+        } else {
+            resultList = new ArrayList<>();
         }
         return resultList;
     }

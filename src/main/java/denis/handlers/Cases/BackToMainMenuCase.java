@@ -6,10 +6,10 @@ import denis.states.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CasesBackToMainMenu implements CasesTemplate{
+public class BackToMainMenuCase implements TemplateCases {
     @Override
     public void execute(ExecutionContext executionContext, CaseLocalState localState) {
-        executionContext.getReplyMessageService().replyWithMainMenu();
+        executionContext.getReplyMessageServiceResident().replyWithMainMenu();
         executionContext.setGlobalState(BotState.MAIN_MENU);
     }
 
