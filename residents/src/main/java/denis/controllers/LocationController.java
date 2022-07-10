@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-@CrossOrigin
+@CrossOrigin (origins = {"https://testbotforresidents.herokuapp.com","https://bot-vue.vercel.app","http://localhost:3000"})
 @RestController
 public class LocationController {
 

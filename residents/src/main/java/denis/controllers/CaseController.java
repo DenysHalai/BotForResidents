@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@CrossOrigin
+@CrossOrigin (origins = {"https://testbotforresidents.herokuapp.com","https://bot-vue.vercel.app","http://localhost:3000"})
 @RestController
 public class CaseController {
 
