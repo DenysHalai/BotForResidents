@@ -1,0 +1,15 @@
+bot_resident:
+  name: FirstTestBotDjek
+  token: 5343043710:AAGkAzWRTW-uf97voR1YPSSud-UkZRIOtlE
+spring:
+  datasource:
+    url: jdbc:postgresql://ec2-54-76-43-89.eu-west-1.compute.amazonaws.com:5432/d6vv57djpbb2pl?user=dljnaljerovnoq&password=1a853ac1e6d2cefab5f2cb5abf7d8dfb9774d009dd9abf874519564d9d6bc626
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: never
